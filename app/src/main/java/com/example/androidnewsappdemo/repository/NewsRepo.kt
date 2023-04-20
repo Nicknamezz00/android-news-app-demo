@@ -22,20 +22,12 @@
  * SOFTWARE.
  */
 
-package com.example.androidnewsappdemo.ui.fragments
+package com.example.androidnewsappdemo.repository
 
-import android.os.Bundle
-import android.view.View
-import androidx.fragment.app.Fragment
-import com.example.androidnewsappdemo.R
-import com.example.androidnewsappdemo.ui.NewsActivity
-import com.example.androidnewsappdemo.ui.NewsViewModel
+import com.example.androidnewsappdemo.api.RetrofitInstance
+import com.example.androidnewsappdemo.db.databases.ArticleDatabase
 
-class SavedNewsFragment : Fragment(R.layout.fragment_saved_news) {
-
-  lateinit var viewModel: NewsViewModel
-  override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-    super.onViewCreated(view, savedInstanceState)
-    viewModel = (activity as NewsActivity).viewModel
-  }
+class NewsRepo(val db: ArticleDatabase) {
+  suspend fun getBreakingNews(countryCode: String, pageNumber: Int) =
+    RetrofitInstance.api.getBreakingNews(countryCode, pageNumber)
 }

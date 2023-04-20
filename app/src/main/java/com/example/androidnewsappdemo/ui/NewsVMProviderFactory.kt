@@ -22,20 +22,15 @@
  * SOFTWARE.
  */
 
-package com.example.androidnewsappdemo.ui.fragments
+package com.example.androidnewsappdemo.ui
 
-import android.os.Bundle
-import android.view.View
-import androidx.fragment.app.Fragment
-import com.example.androidnewsappdemo.R
-import com.example.androidnewsappdemo.ui.NewsActivity
-import com.example.androidnewsappdemo.ui.NewsViewModel
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import com.example.androidnewsappdemo.repository.NewsRepo
 
-class SavedNewsFragment : Fragment(R.layout.fragment_saved_news) {
+class NewsVMProviderFactory(val newsRepository: NewsRepo) : ViewModelProvider.Factory {
 
-  lateinit var viewModel: NewsViewModel
-  override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-    super.onViewCreated(view, savedInstanceState)
-    viewModel = (activity as NewsActivity).viewModel
+  override fun <T : ViewModel> create(modelClass: Class<T>): T {
+    return NewsViewModel(newsRepository) as T
   }
 }
