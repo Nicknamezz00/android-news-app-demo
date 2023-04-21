@@ -27,12 +27,14 @@ package com.example.androidnewsappdemo.ui
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.example.androidnewsappdemo.R
 import com.example.androidnewsappdemo.db.databases.ArticleDatabase
 import com.example.androidnewsappdemo.repository.NewsRepo
 import kotlinx.android.synthetic.main.activity_news.bottomNavigationView
+import kotlinx.android.synthetic.main.activity_news.newsNavHostFragment
 
 class NewsActivity : AppCompatActivity() {
 
@@ -42,14 +44,19 @@ class NewsActivity : AppCompatActivity() {
     setContentView(R.layout.activity_news)
 
     val newsRepository = NewsRepo(ArticleDatabase(this))
-    val vmProviderFactory = NewsVMProviderFactory(newsRepository)
+    val vmProviderFactory = NewsVMProviderFactory(application, newsRepository)
     viewModel = ViewModelProvider(this, vmProviderFactory)[NewsViewModel::class.java]
-
-    val navHostFragment=
+    
+    val navHostFragment =
       supportFragmentManager
-      .findFragmentById(R.id.newsNavHostFragment) as NavHostFragment
+        .findFragmentById(R.id.newsNavHostFragment) as NavHostFragment
 
     val navController= navHostFragment.navController
     bottomNavigationView.setupWithNavController(navController)
+  }
+
+  override fun finish() {
+    super.finish()
+    finish()
   }
 }
