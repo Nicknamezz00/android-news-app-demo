@@ -26,6 +26,8 @@ package com.example.androidnewsappdemo.constants
 
 class Constants {
   companion object {
+    const val DEFAULT_SEARCH_TIME_DELAY = 500L
+    const val DEFAULT_COUNTRY_CODE = "us"
     const val API_KEY = "04d94b9486b048409a89a83812cbfbde"
     const val API_BASE_URL = "http://newsapi.org"
     const val ARTICLE_DB_NAME = "article_db.db"

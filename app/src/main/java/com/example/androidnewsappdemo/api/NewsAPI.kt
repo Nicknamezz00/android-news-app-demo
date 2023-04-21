@@ -36,7 +36,7 @@ interface NewsAPI {
   suspend fun getBreakingNews(
 
     @Query("country")
-    countryCode: String = "cn",
+    countryCode: String = Constants.DEFAULT_COUNTRY_CODE,
 
     @Query("page")
     pageNumber: Int = 1,
