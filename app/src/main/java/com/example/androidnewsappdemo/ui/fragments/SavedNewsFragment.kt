@@ -24,15 +24,20 @@
 
 package com.example.androidnewsappdemo.ui.fragments
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.androidnewsappdemo.R
 import com.example.androidnewsappdemo.adapters.NewsAdapter
 import com.example.androidnewsappdemo.ui.NewsActivity
 import com.example.androidnewsappdemo.ui.NewsViewModel
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.fragment_saved_news.rvSavedNews
 
 class SavedNewsFragment : Fragment(R.layout.fragment_saved_news) {
@@ -53,6 +58,41 @@ class SavedNewsFragment : Fragment(R.layout.fragment_saved_news) {
         bundle
       )
     }
+
+    val itemTouchHelperCallback = object : ItemTouchHelper.SimpleCallback(
+      // specify the dir we want to drag the item, and the dir to swipe item
+      ItemTouchHelper.UP or ItemTouchHelper.DOWN,
+      ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
+    ) {
+      override fun onMove(
+        recyclerView: RecyclerView,
+        viewHolder: RecyclerView.ViewHolder,
+        target: RecyclerView.ViewHolder
+      ): Boolean {
+        return true;
+      }
+
+      override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+        val pos = viewHolder.adapterPosition
+        val article = newsAdapter.differ.currentList[pos]
+        viewModel.deleteArticle(article)
+
+        Snackbar.make(view, "Successfully delete article", Snackbar.LENGTH_SHORT).apply {
+          setAction("Undo") {
+            viewModel.saveArticle(article)
+          }
+          show()
+        }
+      }
+    }
+
+    ItemTouchHelper(itemTouchHelperCallback).apply {
+      attachToRecyclerView(rvSavedNews)
+    }
+
+    viewModel.getSavedNews().observe(viewLifecycleOwner, Observer { articles ->
+      newsAdapter.differ.submitList(articles)
+    })
   }
 
   private fun setUpRecyclerView() {

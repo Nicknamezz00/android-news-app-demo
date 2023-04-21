@@ -26,6 +26,7 @@ package com.example.androidnewsappdemo.repository
 
 import com.example.androidnewsappdemo.api.RetrofitInstance
 import com.example.androidnewsappdemo.db.databases.ArticleDatabase
+import com.example.androidnewsappdemo.models.Article
 
 class NewsRepo(val db: ArticleDatabase) {
   suspend fun getBreakingNews(countryCode: String, pageNumber: Int) =
@@ -33,4 +34,10 @@ class NewsRepo(val db: ArticleDatabase) {
 
   suspend fun searchNews(searchQuery: String, pageNumber: Int) =
     RetrofitInstance.api.searchForNews(searchQuery, pageNumber)
+
+  suspend fun upsert(article: Article) = db.getArticleDao().upsert(article)
+
+  fun getSavedNews() = db.getArticleDao().getAllArticles()
+
+  suspend fun deleteArticle(article: Article) = db.getArticleDao().deleteArticle(article)
 }

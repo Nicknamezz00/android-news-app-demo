@@ -29,13 +29,14 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.androidnewsappdemo.constants.Constants
+import com.example.androidnewsappdemo.models.Article
 import com.example.androidnewsappdemo.models.NewsResponse
 import com.example.androidnewsappdemo.repository.NewsRepo
 import com.example.androidnewsappdemo.utils.Resource
 import kotlinx.coroutines.launch
 import retrofit2.Response
 
-class NewsViewModel(val newsRepository: NewsRepo) : ViewModel() {
+class NewsViewModel(val newsRepo: NewsRepo) : ViewModel() {
 
   val breakingNews: MutableLiveData<Resource<NewsResponse>> = MutableLiveData()
   var breakingNewsPageNumber = 1
@@ -51,13 +52,13 @@ class NewsViewModel(val newsRepository: NewsRepo) : ViewModel() {
   fun getBreakingNews(countryCode: String) = viewModelScope.launch {
     breakingNews.postValue(Resource.Loading())
     val response =
-      newsRepository.getBreakingNews(countryCode, breakingNewsPageNumber)
+      newsRepo.getBreakingNews(countryCode, breakingNewsPageNumber)
     breakingNews.postValue(breakingNewsResponseHandler(response))
   }
 
   fun searchNews(q: String) = viewModelScope.launch {
     searchNews.postValue(Resource.Loading())
-    val response = newsRepository.searchNews(q, searchNewsPageNumber)
+    val response = newsRepo.searchNews(q, searchNewsPageNumber)
     searchNews.postValue(searchNewsResponseHandler(response))
   }
 
@@ -77,5 +78,15 @@ class NewsViewModel(val newsRepository: NewsRepo) : ViewModel() {
       }
     }
     return Resource.Error(response.message())
+  }
+
+  fun saveArticle(article: Article) = viewModelScope.launch {
+    newsRepo.upsert(article)
+  }
+
+  fun getSavedNews() = newsRepo.getSavedNews()
+
+  fun deleteArticle(article: Article) = viewModelScope.launch {
+    newsRepo.deleteArticle(article)
   }
 }

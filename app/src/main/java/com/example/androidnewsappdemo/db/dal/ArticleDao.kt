@@ -38,6 +38,8 @@ interface ArticleDao {
   @Insert(onConflict = OnConflictStrategy.REPLACE)
   suspend fun upsert(article: Article): Long
 
+  // Livedata doc:
+  // https://developer.android.google.cn/topic/libraries/architecture/livedata?hl=zh-cn
   @Query("SELECT * FROM articles")
   fun getAllArticles(): LiveData<List<Article>>
 
