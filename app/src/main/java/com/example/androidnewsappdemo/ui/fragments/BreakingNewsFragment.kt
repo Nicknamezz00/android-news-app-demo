@@ -29,14 +29,11 @@ import android.util.Log
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.androidnewsappdemo.R
-import com.example.androidnewsappdemo.adapter.NewsAdapter
-import com.example.androidnewsappdemo.db.databases.ArticleDatabase
-import com.example.androidnewsappdemo.repository.NewsRepo
+import com.example.androidnewsappdemo.adapters.NewsAdapter
 import com.example.androidnewsappdemo.ui.NewsActivity
-import com.example.androidnewsappdemo.ui.NewsVMProviderFactory
 import com.example.androidnewsappdemo.ui.NewsViewModel
 import com.example.androidnewsappdemo.utils.Resource
 import kotlinx.android.synthetic.main.fragment_breaking_news.paginationProgressBar
@@ -51,14 +48,21 @@ class BreakingNewsFragment : Fragment(R.layout.fragment_breaking_news) {
     viewModel = (activity as NewsActivity).viewModel
     setUpRecyclerView()
 
+    newsAdapter.setOnItemClickListener {
+      val bundle = Bundle().apply {
+        putSerializable("article", it)
+      }
+      findNavController().navigate(R.id.action_breakingNewsFragment_to_articleFragment, bundle)
+    }
+
     viewModel.breakingNews.observe(viewLifecycleOwner, Observer { response ->
       when (response) {
         is Resource.Success -> {
           hideProgress()
           response.data?.let { newsResponse ->
             newsAdapter
-              .differ.
-              submitList(newsResponse.articles)
+              .differ
+              .submitList(newsResponse.articles)
           }
         }
         is Resource.Error -> {

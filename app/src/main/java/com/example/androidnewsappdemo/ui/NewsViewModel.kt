@@ -28,6 +28,7 @@ import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.androidnewsappdemo.constants.Constants
 import com.example.androidnewsappdemo.models.NewsResponse
 import com.example.androidnewsappdemo.repository.NewsRepo
 import com.example.androidnewsappdemo.utils.Resource
@@ -44,24 +45,19 @@ class NewsViewModel(val newsRepository: NewsRepo) : ViewModel() {
 
   init {
     Log.d("NewsViewModel", "Init")
-    getBreakingNews("cn")
+    getBreakingNews(Constants.DEFAULT_COUNTRY_CODE)
   }
 
   fun getBreakingNews(countryCode: String) = viewModelScope.launch {
-    Log.d("NewsViewModel", "Post value begin")
     breakingNews.postValue(Resource.Loading())
-    Log.d("NewsViewModel", "Post value end")
     val response =
       newsRepository.getBreakingNews(countryCode, breakingNewsPageNumber)
-
-    Log.d("NewsViewModel", "response: $response")
     breakingNews.postValue(breakingNewsResponseHandler(response))
   }
 
-
-  fun searchNews(searchQuery: String) = viewModelScope.launch {
+  fun searchNews(q: String) = viewModelScope.launch {
     searchNews.postValue(Resource.Loading())
-    val response = newsRepository.searchNews(searchQuery, searchNewsPageNumber)
+    val response = newsRepository.searchNews(q, searchNewsPageNumber)
     searchNews.postValue(searchNewsResponseHandler(response))
   }
 

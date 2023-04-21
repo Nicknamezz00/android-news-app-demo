@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package com.example.androidnewsappdemo.adapter
+package com.example.androidnewsappdemo.adapters
 
 import android.view.LayoutInflater
 import android.view.View
