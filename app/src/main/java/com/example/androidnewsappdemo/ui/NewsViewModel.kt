@@ -66,7 +66,6 @@ class NewsViewModel(
   private var oldSearchQuery : String? = null
 
   init {
-    Log.d("NewsViewModel", "Init")
     getBreakingNews(Constants.DEFAULT_COUNTRY_CODE)
   }
 

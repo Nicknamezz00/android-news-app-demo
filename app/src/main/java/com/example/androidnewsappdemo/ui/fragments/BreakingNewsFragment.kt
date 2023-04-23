@@ -26,7 +26,9 @@ package com.example.androidnewsappdemo.ui.fragments
 
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.AbsListView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -40,35 +42,53 @@ import com.example.androidnewsappdemo.constants.Constants
 import com.example.androidnewsappdemo.ui.NewsActivity
 import com.example.androidnewsappdemo.ui.NewsViewModel
 import com.example.androidnewsappdemo.utils.Resource
+import kotlinx.android.synthetic.main.fragment_breaking_news.itemErrorMessage
 import kotlinx.android.synthetic.main.fragment_breaking_news.paginationProgressBar
 import kotlinx.android.synthetic.main.fragment_breaking_news.rvBreakingNews
+import kotlinx.android.synthetic.main.item_error_message.btnRetry
+import kotlinx.android.synthetic.main.item_error_message.tvErrorMessage
 
 class BreakingNewsFragment : Fragment(R.layout.fragment_breaking_news) {
 
   lateinit var viewModel: NewsViewModel
   lateinit var newsAdapter: NewsAdapter
+
+  override fun onCreateView(
+    inflater: LayoutInflater,
+    container: ViewGroup?,
+    savedInstanceState: Bundle?
+  ): View? {
+    return inflater.inflate(R.layout.fragment_breaking_news, container, false)
+  }
+
   override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
     super.onViewCreated(view, savedInstanceState)
+//    Log.d("BreakingNewsFragment", "OnViewCreated!")
     viewModel = (activity as NewsActivity).viewModel
     setUpRecyclerView()
+
+    viewModel.getBreakingNews(Constants.DEFAULT_COUNTRY_CODE)
 
     newsAdapter.setOnItemClickListener {
       val bundle = Bundle().apply {
         putSerializable("article", it)
       }
       findNavController().navigate(R.id.action_breakingNewsFragment_to_articleFragment, bundle)
-      Log.d("BreakingNewsFragment", "HERE")
+//      Log.d("BreakingNewsFragment", "FindController")
     }
 
+//    Log.d("BreakingNewsFragment", "Adapter done")
+
     viewModel.breakingNews.observe(viewLifecycleOwner, Observer { response ->
+//      Log.d("BreakingNewsFragment", "response = $response")
       when (response) {
         is Resource.Success -> {
           hideProgress()
+          hideErrorMessage()
           response.data?.let { newsResponse ->
             newsAdapter
               .differ
-              .submitList(newsResponse.articles.toList())
-
+              .submitList(newsResponse.articles)
             // add 1: For arithmetic ceil
             // add 1: Another page is always empty
             val totalPages = newsResponse.totalResults / Constants.DEFAULT_QUERY_PAGE_SIZE + 2
@@ -81,15 +101,20 @@ class BreakingNewsFragment : Fragment(R.layout.fragment_breaking_news) {
         is Resource.Error -> {
           hideProgress()
           response.message?.let { message ->
-            Log.e("BreakingNewsFragment", "error: $message")
             Toast.makeText(activity, "An error occurred: $message", Toast.LENGTH_SHORT).show()
+            showErrorMessage(message)
           }
         }
         is Resource.Loading -> {
+//          Log.d("BreakingNewsFragment", "Loading")
           showProgress()
         }
       }
     })
+
+    btnRetry.setOnClickListener {
+      viewModel.getBreakingNews(Constants.DEFAULT_COUNTRY_CODE)
+    }
   }
 
   private fun hideProgress() {
@@ -102,6 +127,18 @@ class BreakingNewsFragment : Fragment(R.layout.fragment_breaking_news) {
     isLoading = true
   }
 
+  private fun hideErrorMessage() {
+    itemErrorMessage.visibility = View.INVISIBLE
+    isError = false
+  }
+
+  private fun showErrorMessage(message: String) {
+    itemErrorMessage.visibility = View.VISIBLE
+    tvErrorMessage.text = message
+    isError = true
+  }
+
+  var isError = false
   var isLoading = false
   var isLastPage = false
   var isScrolling = false
@@ -116,21 +153,22 @@ class BreakingNewsFragment : Fragment(R.layout.fragment_breaking_news) {
 
     override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
       super.onScrolled(recyclerView, dx, dy)
+
       val layoutManager = recyclerView.layoutManager as LinearLayoutManager
       val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
       val childCount = layoutManager.childCount
-      val itemCount = layoutManager.itemCount
+      val totalItemCount = layoutManager.itemCount
 
-      val isLastItem = firstVisibleItemPosition + childCount >= itemCount
+      val isLastItem = firstVisibleItemPosition + childCount >= totalItemCount
       val isNotBeginning = firstVisibleItemPosition >= 0
-      val isTotalMoreThanVisible = itemCount >= Constants.DEFAULT_QUERY_PAGE_SIZE
-
-      val paginate = !isLoading && !isLastPage
+      val paginate = !isError
+          && (!isLoading && !isLastPage)
           && isLastItem
           && isNotBeginning
-          && isTotalMoreThanVisible
+          && (totalItemCount >= Constants.DEFAULT_QUERY_PAGE_SIZE)
+          && isScrolling
 
-      if (paginate) {
+      if(paginate) {
         viewModel.getBreakingNews(Constants.DEFAULT_COUNTRY_CODE)
         isScrolling = false
       }

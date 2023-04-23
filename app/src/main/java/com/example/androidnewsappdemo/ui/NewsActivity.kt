@@ -24,9 +24,13 @@
 
 package com.example.androidnewsappdemo.ui
 
+import android.content.Context
 import android.os.Bundle
+import android.util.AttributeSet
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
@@ -46,17 +50,14 @@ class NewsActivity : AppCompatActivity() {
     val newsRepository = NewsRepo(ArticleDatabase(this))
     val vmProviderFactory = NewsVMProviderFactory(application, newsRepository)
     viewModel = ViewModelProvider(this, vmProviderFactory)[NewsViewModel::class.java]
-    
+
+//    bottomNavigationView.setupWithNavController(newsNavHostFragment.findNavController())
+
     val navHostFragment =
       supportFragmentManager
         .findFragmentById(R.id.newsNavHostFragment) as NavHostFragment
 
-    val navController= navHostFragment.navController
+    val navController = navHostFragment.navController
     bottomNavigationView.setupWithNavController(navController)
-  }
-
-  override fun finish() {
-    super.finish()
-    finish()
   }
 }
